@@ -1,0 +1,7 @@
+export const WHATSAPP_NUMBER = '2348000000000'
+export const PHONE_NUMBER = '+2348000000000'
+export const PHONE_DISPLAY = '+234 800 000 0000'
+export const EMAIL = 'info@lagospowersolutions.com'
+export const COMPANY_NAME = 'Lagos Power Solutions'
+export const SITE_URL = 'https://lagospowersolutions.com'
+export const SITE_DESCRIPTION = 'Reliable generator sales, engine parts, repair and servicing in Lagos. Call or WhatsApp us for fast response.'
