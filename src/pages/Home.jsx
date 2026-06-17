@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import CTASection from '../components/CTASection'
+import HeroCarousel from '../components/HeroCarousel'
 
 const features = [
   { title: '10+ Years Experience', desc: 'Deep expertise in generator sales, servicing, and parts supply across Lagos.' },
@@ -17,33 +18,7 @@ const featuredProducts = [
 export default function Home() {
   return (
     <>
-      <section className="relative overflow-hidden bg-[var(--color-primary)] py-20 text-white sm:py-28">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(217,119,6,0.15),transparent_60%)]" />
-        <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <h1 className="mb-4 text-[clamp(2rem,5vw,4rem)] font-extrabold leading-[1.1] tracking-tight">
-            Power That Never Quits
-          </h1>
-          <p className="mx-auto mb-8 max-w-2xl text-base leading-relaxed opacity-80 sm:text-lg">
-            Lagos&apos; trusted source for generator sales, genuine engine parts, and expert maintenance services. Fast response. Fair prices. Reliable delivery.
-          </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Link
-              to="/products"
-              className="inline-flex items-center gap-2 rounded-lg bg-[var(--color-secondary)] px-6 py-3 text-sm font-bold text-white no-underline transition-all hover:bg-[var(--color-secondary-light)]"
-            >
-              View Products
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </Link>
-            <a
-              href="tel:+2348000000000"
-              className="inline-flex items-center gap-2 rounded-lg border-2 border-white/30 bg-white/10 px-6 py-3 text-sm font-bold text-white no-underline backdrop-blur-sm transition-all hover:bg-white/20"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
-              Call +234 800 000 0000
-            </a>
-          </div>
-        </div>
-      </section>
+      <HeroCarousel />
 
       <section className="py-16 sm:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
