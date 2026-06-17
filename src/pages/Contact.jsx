@@ -8,12 +8,30 @@ const contactInfo = [
   { icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>, label: 'Email', value: EMAIL, href: `mailto:${EMAIL}` },
 ]
 
+const FORM_ENDPOINT = 'https://formspree.io/f/mzdqqogy'
+
 export default function Contact() {
   const [submitted, setSubmitted] = useState(false)
+  const [error, setError] = useState(false)
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    setSubmitted(true)
+    const form = e.target
+    const data = new FormData(form)
+    try {
+      const res = await fetch(FORM_ENDPOINT, {
+        method: 'POST',
+        body: data,
+        headers: { Accept: 'application/json' },
+      })
+      if (res.ok) {
+        setSubmitted(true)
+      } else {
+        setError(true)
+      }
+    } catch {
+      setError(true)
+    }
   }
 
   return (
@@ -57,6 +75,10 @@ export default function Contact() {
                 {submitted ? (
                   <div className="rounded-xl border border-[var(--color-success)]/30 bg-[var(--color-success)]/5 p-6 text-center">
                     <p className="font-semibold text-[var(--color-success)]">Thank you! We&apos;ll get back to you shortly.</p>
+                  </div>
+                ) : error ? (
+                  <div className="rounded-xl border border-[var(--color-error)]/30 bg-[var(--color-error)]/5 p-6 text-center">
+                    <p className="font-semibold text-[var(--color-error)]">Something went wrong. Please try again or WhatsApp us directly.</p>
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-4">
