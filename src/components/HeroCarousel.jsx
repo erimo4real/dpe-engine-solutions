@@ -57,7 +57,7 @@ export default function HeroCarousel() {
         <div
           key={i}
           className={`absolute inset-0 transition-opacity duration-700 ${
-            i === current ? 'opacity-100' : 'opacity-0'
+            i === current ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
           }`}
         >
           <img
