@@ -4,31 +4,31 @@ import { WHATSAPP_NUMBER, PHONE_NUMBER, COMPANY_NAME } from '../constants'
 
 const slides = [
   {
-    img: 'https://images.unsplash.com/photo-1611288817393-cdf4e0d3c8df?w=1200&q=80',
+    img: '/images/slide1-generator.jpg',
     title: 'Reliable Generators for Every Need',
     subtitle: 'From 5KVA homesets to 20KVA industrial units — we supply, install, and maintain.',
     cta: { label: 'View Generators', to: '/products' },
   },
   {
-    img: 'https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=1200&q=80',
+    img: '/images/slide2-engine-parts.jpg',
     title: 'Genuine Engine Parts Supplied',
     subtitle: 'Cylinder heads, alternator parts, fuel systems, and control panels. New & reconditioned.',
     cta: { label: 'Browse Parts', to: '/products' },
   },
   {
-    img: 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=1200&q=80',
+    img: '/images/slide3-repair.jpg',
     title: 'Expert Generator Repairs',
     subtitle: 'Fast diagnosis and repair by experienced technicians. Minor fixes to complete overhauls.',
     cta: { label: 'Request Service', to: '/services' },
   },
   {
-    img: 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=1200&q=80',
+    img: '/images/slide4-servicing.jpg',
     title: 'Servicing & Cleaning',
     subtitle: 'Routine maintenance to extend generator life. Oil changes, filter replacements, and more.',
     cta: { label: 'Book a Service', to: '/services' },
   },
   {
-    img: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200&q=80',
+    img: '/images/slide5-team.jpg',
     title: `${COMPANY_NAME}`,
     subtitle: 'Lagos trusted partner for generator sales, parts, repair, and logistics support.',
     cta: { label: 'Contact Us', to: '/contact' },
