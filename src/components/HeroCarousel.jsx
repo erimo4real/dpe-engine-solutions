@@ -4,31 +4,31 @@ import { WHATSAPP_NUMBER, PHONE_NUMBER, COMPANY_NAME } from '../constants'
 
 const slides = [
   {
-    img: '/images/slide1-generator.jpg',
+    img: '/images/firema5kv.webp',
     title: 'Reliable Generators for Every Need',
     subtitle: 'From 5KVA homesets to 20KVA industrial units — we supply, install, and maintain.',
     cta: { label: 'View Generators', to: '/products' },
   },
   {
-    img: '/images/slide2-engine-parts.jpg',
+    img: '/images/Sumecfireman10sp.jpg',
     title: 'Genuine Engine Parts Supplied',
     subtitle: 'Cylinder heads, alternator parts, fuel systems, and control panels. New & reconditioned.',
     cta: { label: 'Browse Parts', to: '/products' },
   },
   {
-    img: '/images/slide3-repair.jpg',
+    img: '/images/YUCHAI9.webp',
     title: 'Expert Generator Repairs',
     subtitle: 'Fast diagnosis and repair by experienced technicians. Minor fixes to complete overhauls.',
     cta: { label: 'Request Service', to: '/services' },
   },
   {
-    img: '/images/slide4-servicing.jpg',
+    img: '/images/20kvgenerator.jpg',
     title: 'Servicing & Cleaning',
     subtitle: 'Routine maintenance to extend generator life. Oil changes, filter replacements, and more.',
     cta: { label: 'Book a Service', to: '/services' },
   },
   {
-    img: '/images/slide5-team.jpg',
+    img: '/images/firema5kv.webp',
     title: `${COMPANY_NAME}`,
     subtitle: 'Lagos trusted partner for generator sales, parts, repair, and logistics support.',
     cta: { label: 'Contact Us', to: '/contact' },
@@ -56,17 +56,17 @@ export default function HeroCarousel() {
       {slides.map((slide, i) => (
         <div
           key={i}
-          className={`absolute inset-0 transition-opacity duration-700 ${
+          className={`absolute inset-0 bg-[var(--color-primary)] transition-opacity duration-700 ${
             i === current ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
           }`}
         >
           <img
             src={slide.img}
             alt={slide.title}
-            className="h-full w-full object-cover"
+            className="absolute inset-0 h-full w-full object-contain p-4"
             loading={i === 0 ? 'eager' : 'lazy'}
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-primary)]/80 via-[var(--color-primary)]/50 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-primary)]/90 via-[var(--color-primary)]/60 to-[var(--color-primary)]/30" />
           <div className="absolute inset-0 flex items-center">
             <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
               <div className="max-w-xl">

@@ -10,9 +10,9 @@ const features = [
 ]
 
 const featuredProducts = [
-  { name: '5KVA Generator', desc: 'Ideal for home backup. Compact, fuel-efficient, reliable.', specs: ['Petrol/Diesel', 'Single phase', 'Low noise'] },
-  { name: '10KVA Generator', desc: 'Perfect for small businesses. Robust performance.', specs: ['Diesel', 'Three phase ready', 'Auto start'] },
-  { name: '20KVA Generator', desc: 'For commercial use. Heavy-duty continuous operation.', specs: ['Diesel', 'Three phase', 'Industrial grade'] },
+  { name: '5KVA Generator', img: '/images/firema5kv.webp', desc: 'Ideal for home backup. Compact, fuel-efficient, reliable.', specs: ['Petrol/Diesel', 'Single phase', 'Low noise'] },
+  { name: '10KVA Generator', img: '/images/Sumecfireman10sp.jpg', desc: 'Perfect for small businesses. Robust performance.', specs: ['Diesel', 'Three phase ready', 'Auto start'] },
+  { name: '20KVA Generator', img: '/images/20kvgenerator.jpg', desc: 'For commercial use. Heavy-duty continuous operation.', specs: ['Diesel', 'Three phase', 'Industrial grade'] },
 ]
 
 export default function Home() {
@@ -49,22 +49,32 @@ export default function Home() {
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {featuredProducts.map((p) => (
-              <div key={p.name} className="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)] p-6 shadow-sm">
-                <h3 className="mb-2 text-lg font-bold">{p.name}</h3>
-                <p className="mb-3 text-sm text-[var(--color-muted)]">{p.desc}</p>
-                <ul className="mb-4 space-y-1 text-sm">
-                  {p.specs.map((s, i) => (
-                    <li key={i} className="flex items-center gap-2">
-                      <span className="size-1.5 rounded-full bg-[var(--color-secondary)]" />
-                      {s}
-                    </li>
-                  ))}
-                </ul>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-[var(--color-accent)]">Call for price</span>
-                  <Link to="/products" className="text-sm font-semibold text-[var(--color-primary)] no-underline hover:underline">
-                    View All &rarr;
-                  </Link>
+              <div key={p.name} className="overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm transition-all hover:-translate-y-1 hover:shadow-md">
+                <div className="aspect-[4/3] overflow-hidden bg-[var(--color-bg)]">
+                  <img
+                    src={p.img}
+                    alt={p.name}
+                    className="h-full w-full object-cover transition-transform hover:scale-105"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="p-5">
+                  <h3 className="mb-2 text-lg font-bold">{p.name}</h3>
+                  <p className="mb-3 text-sm text-[var(--color-muted)]">{p.desc}</p>
+                  <ul className="mb-4 space-y-1 text-sm">
+                    {p.specs.map((s, i) => (
+                      <li key={i} className="flex items-center gap-2">
+                        <span className="size-1.5 rounded-full bg-[var(--color-secondary)]" />
+                        {s}
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-semibold text-[var(--color-accent)]">Call for price</span>
+                    <Link to="/products" className="text-sm font-semibold text-[var(--color-primary)] no-underline hover:underline">
+                      View All &rarr;
+                    </Link>
+                  </div>
                 </div>
               </div>
             ))}
