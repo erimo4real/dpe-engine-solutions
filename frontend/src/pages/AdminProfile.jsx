@@ -58,28 +58,32 @@ export default function AdminProfile() {
 
       <div className="mx-auto max-w-lg">
         <div className="rounded-xl border border-[var(--color-border)] bg-white p-6 shadow-sm">
-          <div className="mb-6 flex items-center gap-4">
+          <div className="mb-6 flex flex-col items-center gap-4 sm:flex-row">
             <div className="relative">
               {avatar ? (
-                <img src={avatar} alt="" className="size-16 rounded-full object-cover shadow-sm" />
+                <img src={avatar} alt="" className="size-20 rounded-full object-cover shadow-sm" />
               ) : (
-                <div className="flex size-16 items-center justify-center rounded-full bg-[var(--color-primary)] text-xl font-bold text-white shadow-sm">
+                <div className="flex size-20 items-center justify-center rounded-full bg-[var(--color-primary)] text-2xl font-bold text-white shadow-sm">
                   {user?.full_name?.[0]?.toUpperCase() || user?.username?.[0]?.toUpperCase()}
                 </div>
               )}
               <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading}
-                className="absolute -bottom-1 -right-1 flex size-7 items-center justify-center rounded-full border-2 border-white bg-[var(--color-primary)] text-white shadow-sm transition-colors hover:bg-[var(--color-primary-light)]">
+                className="absolute -bottom-1 -right-1 flex size-8 items-center justify-center rounded-full border-2 border-white bg-[var(--color-primary)] text-white shadow-sm transition-colors hover:bg-[var(--color-primary-light)]">
                 {uploading ? (
-                  <div className="size-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  <div className="size-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
                 ) : (
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
                 )}
               </button>
               <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleUpload} />
             </div>
-            <div>
+            <div className="text-center sm:text-left">
               <h2 className="text-lg font-bold text-[var(--color-text)]">{user?.full_name || user?.username}</h2>
               <p className="text-sm text-[var(--color-muted)]">@{user?.username}</p>
+              <button type="button" onClick={() => fileRef.current?.click()}
+                className="mt-2 text-xs font-medium text-[var(--color-primary)] underline underline-offset-2 transition-colors hover:text-[var(--color-primary-light)]">
+                {uploading ? 'Uploading...' : 'Change profile photo'}
+              </button>
             </div>
           </div>
 
