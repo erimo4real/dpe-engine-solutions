@@ -146,13 +146,15 @@ router.post('/reset-password', async (req, res) => {
 })
 
 router.get('/me', authMiddleware, async (req, res) => {
-  const { data: user } = await supabase
+  const { data: user, error } = await supabase
     .from('users')
-    .select('id, username, email, full_name')
+    .select('*')
     .eq('id', req.userId)
     .single()
+
+  if (error) return res.status(500).json({ error: error.message })
   if (!user) return res.status(401).json({ error: 'User not found' })
-  res.json({ user })
+  res.json({ user: { id: user.id, username: user.username, email: user.email || null, full_name: user.full_name || null } })
 })
 
 // Update own profile
@@ -171,11 +173,11 @@ router.put('/profile', authMiddleware, async (req, res) => {
       .from('users')
       .update(updates)
       .eq('id', req.userId)
-      .select('id, username, email, full_name')
+      .select('*')
       .single()
 
     if (error) return res.status(500).json({ error: error.message })
-    res.json({ user })
+    res.json({ user: { id: user.id, username: user.username, email: user.email || null, full_name: user.full_name || null } })
   } catch (err) {
     res.status(500).json({ error: 'Server error' })
   }
@@ -193,22 +195,23 @@ function requireAdmin(req, res, next) {
 router.get('/users', authMiddleware, requireAdmin, async (req, res) => {
   const { data: users, error } = await supabase
     .from('users')
-    .select('id, username, email, full_name, created_at')
+    .select('*')
     .order('id', { ascending: true })
 
   if (error) return res.status(500).json({ error: error.message })
-  res.json({ users })
+  const clean = users.map((u) => ({ id: u.id, username: u.username, email: u.email || null, full_name: u.full_name || null, created_at: u.created_at }))
+  res.json({ users: clean })
 })
 
 router.get('/users/:id', authMiddleware, requireAdmin, async (req, res) => {
   const { data: user, error } = await supabase
     .from('users')
-    .select('id, username, email, full_name, created_at')
+    .select('*')
     .eq('id', req.params.id)
     .single()
 
   if (error || !user) return res.status(404).json({ error: 'User not found' })
-  res.json({ user })
+  res.json({ user: { id: user.id, username: user.username, email: user.email || null, full_name: user.full_name || null, created_at: user.created_at } })
 })
 
 router.post('/users', authMiddleware, requireAdmin, async (req, res) => {
@@ -225,7 +228,7 @@ router.post('/users', authMiddleware, requireAdmin, async (req, res) => {
     const { data: user, error } = await supabase
       .from('users')
       .insert([{ username, password_hash: hash, full_name, email }])
-      .select('id, username, email, full_name')
+      .select('*')
       .single()
 
     if (error) {
@@ -234,7 +237,7 @@ router.post('/users', authMiddleware, requireAdmin, async (req, res) => {
       }
       return res.status(500).json({ error: error.message })
     }
-    res.status(201).json({ user })
+    res.status(201).json({ user: { id: user.id, username: user.username, email: user.email || null, full_name: user.full_name || null } })
   } catch (err) {
     res.status(500).json({ error: 'Server error' })
   }
@@ -260,7 +263,7 @@ router.put('/users/:id', authMiddleware, requireAdmin, async (req, res) => {
       .from('users')
       .update(updates)
       .eq('id', req.params.id)
-      .select('id, username, email, full_name')
+      .select('*')
       .single()
 
     if (error) {
@@ -270,7 +273,7 @@ router.put('/users/:id', authMiddleware, requireAdmin, async (req, res) => {
       return res.status(500).json({ error: error.message })
     }
     if (!user) return res.status(404).json({ error: 'User not found' })
-    res.json({ user })
+    res.json({ user: { id: user.id, username: user.username, email: user.email || null, full_name: user.full_name || null } })
   } catch (err) {
     res.status(500).json({ error: 'Server error' })
   }
