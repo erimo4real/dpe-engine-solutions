@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import { supabase } from '../config/supabase.js'
 import { generateToken, authMiddleware, cookieOptions } from '../middleware/auth.js'
+import { deleteCloudinaryImage } from '../config/cloudinary.js'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-in-production'
 
@@ -168,6 +169,17 @@ router.put('/profile', authMiddleware, async (req, res) => {
 
     if (Object.keys(updates).length === 0) {
       return res.status(400).json({ error: 'Nothing to update' })
+    }
+
+    if (avatar_url) {
+      const { data: current } = await supabase
+        .from('users')
+        .select('avatar_url')
+        .eq('id', req.userId)
+        .single()
+      if (current?.avatar_url && current.avatar_url !== avatar_url) {
+        await deleteCloudinaryImage(current.avatar_url)
+      }
     }
 
     const { data: user, error } = await supabase
