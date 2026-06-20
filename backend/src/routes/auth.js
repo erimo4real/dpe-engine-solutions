@@ -154,16 +154,17 @@ router.get('/me', authMiddleware, async (req, res) => {
 
   if (error) return res.status(500).json({ error: error.message })
   if (!user) return res.status(401).json({ error: 'User not found' })
-  res.json({ user: { id: user.id, username: user.username, email: user.email || null, full_name: user.full_name || null } })
+  res.json({ user: { id: user.id, username: user.username, email: user.email || null, full_name: user.full_name || null, avatar_url: user.avatar_url || null } })
 })
 
 // Update own profile
 router.put('/profile', authMiddleware, async (req, res) => {
   try {
-    const { full_name, email } = req.body
+    const { full_name, email, avatar_url } = req.body
     const updates = {}
     if (full_name !== undefined) updates.full_name = full_name
     if (email !== undefined) updates.email = email
+    if (avatar_url !== undefined) updates.avatar_url = avatar_url
 
     if (Object.keys(updates).length === 0) {
       return res.status(400).json({ error: 'Nothing to update' })
@@ -177,7 +178,7 @@ router.put('/profile', authMiddleware, async (req, res) => {
       .single()
 
     if (error) return res.status(500).json({ error: error.message })
-    res.json({ user: { id: user.id, username: user.username, email: user.email || null, full_name: user.full_name || null } })
+    res.json({ user: { id: user.id, username: user.username, email: user.email || null, full_name: user.full_name || null, avatar_url: user.avatar_url || null } })
   } catch (err) {
     res.status(500).json({ error: 'Server error' })
   }

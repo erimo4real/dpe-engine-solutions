@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Helmet } from 'react-helmet-async'
 import { api } from '../services/api'
@@ -10,6 +10,27 @@ export default function AdminProfile() {
   const [form, setForm] = useState({ full_name: user?.full_name || '', email: user?.email || '' })
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState(null)
+  const [uploading, setUploading] = useState(false)
+  const [avatar, setAvatar] = useState(user?.avatar_url || null)
+  const fileRef = useRef(null)
+
+  const handleUpload = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    try {
+      const { url } = await api.upload(file)
+      setAvatar(url)
+      await api.users.updateProfile({ avatar_url: url })
+      await dispatch(checkAuth())
+      setMessage({ type: 'success', text: 'Avatar updated!' })
+      setTimeout(() => setMessage(null), 3000)
+    } catch (err) {
+      setMessage({ type: 'error', text: err.message })
+    } finally {
+      setUploading(false)
+    }
+  }
 
   const handleSave = async (e) => {
     e.preventDefault()
@@ -38,7 +59,24 @@ export default function AdminProfile() {
       <div className="mx-auto max-w-lg">
         <div className="rounded-xl border border-[var(--color-border)] bg-white p-6 shadow-sm">
           <div className="mb-6 flex items-center gap-4">
-            <div className="flex size-16 items-center justify-center rounded-full bg-[var(--color-primary)] text-xl font-bold text-white shadow-sm">{user?.full_name?.[0]?.toUpperCase() || user?.username?.[0]?.toUpperCase()}</div>
+            <div className="relative">
+              {avatar ? (
+                <img src={avatar} alt="" className="size-16 rounded-full object-cover shadow-sm" />
+              ) : (
+                <div className="flex size-16 items-center justify-center rounded-full bg-[var(--color-primary)] text-xl font-bold text-white shadow-sm">
+                  {user?.full_name?.[0]?.toUpperCase() || user?.username?.[0]?.toUpperCase()}
+                </div>
+              )}
+              <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading}
+                className="absolute -bottom-1 -right-1 flex size-7 items-center justify-center rounded-full border-2 border-white bg-[var(--color-primary)] text-white shadow-sm transition-colors hover:bg-[var(--color-primary-light)]">
+                {uploading ? (
+                  <div className="size-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                ) : (
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                )}
+              </button>
+              <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleUpload} />
+            </div>
             <div>
               <h2 className="text-lg font-bold text-[var(--color-text)]">{user?.full_name || user?.username}</h2>
               <p className="text-sm text-[var(--color-muted)]">@{user?.username}</p>

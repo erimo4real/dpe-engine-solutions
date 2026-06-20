@@ -50,6 +50,7 @@ CREATE TABLE IF NOT EXISTS password_reset_tokens (
 -- Migration: add columns to users (safe to run on existing tables)
 ALTER TABLE users ADD COLUMN IF NOT EXISTS email TEXT;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS full_name TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT;
 
 -- Seed categories
 INSERT INTO categories (name, slug, sort_order) VALUES

@@ -148,7 +148,11 @@ export default function AdminLayout() {
       <aside className={`flex flex-col border-r border-[var(--color-border)] bg-white transition-all duration-300 ${sidebarCollapsed ? 'w-20' : 'w-64'}`}>
         <div className="flex items-center justify-between border-b border-[var(--color-border)] px-5 py-4">
           <div className="flex items-center gap-2.5">
-              <div className="flex size-9 items-center justify-center rounded-lg bg-[var(--color-primary)] text-sm font-bold text-white shadow-sm">{user?.full_name?.[0]?.toUpperCase() || 'D'}</div>
+              {user?.avatar_url ? (
+                <img src={user.avatar_url} alt="" className="size-9 rounded-lg object-cover shadow-sm" />
+              ) : (
+                <div className="flex size-9 items-center justify-center rounded-lg bg-[var(--color-primary)] text-sm font-bold text-white shadow-sm">{user?.full_name?.[0]?.toUpperCase() || 'D'}</div>
+              )}
               {!sidebarCollapsed && (
                 <div>
                   <h1 className="text-sm font-bold text-[var(--color-primary)]">DPE Admin</h1>
@@ -223,9 +227,13 @@ export default function AdminLayout() {
         <div className="border-t border-[var(--color-border)] p-3">
           {!sidebarCollapsed && (
             <div className="mb-3 flex items-center gap-3 px-3">
-              <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary)] text-xs font-bold text-white shadow-sm">
-                {user?.username?.[0]?.toUpperCase() || 'A'}
-              </div>
+              {user?.avatar_url ? (
+                <img src={user.avatar_url} alt="" className="size-9 shrink-0 rounded-full object-cover shadow-sm" />
+              ) : (
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-primary)] text-xs font-bold text-white shadow-sm">
+                  {user?.username?.[0]?.toUpperCase() || 'A'}
+                </div>
+              )}
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium text-[var(--color-text)]">{user?.username}</p>
                 <p className="truncate text-[10px] text-[var(--color-muted)]">Administrator</p>
