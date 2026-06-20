@@ -29,6 +29,7 @@ const links = [
   { to: '/admin/products', label: 'Products', icon: '<path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>' },
   { to: '/admin/categories', label: 'Categories', icon: '<path d="M4 6h16M4 12h16M4 18h16"/>' },
   { to: '/admin/inquiries', label: 'Inquiries', icon: '<path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>' },
+  { to: '/admin/users', label: 'Users', icon: '<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>' },
 ]
 
 function timeAgo(dateStr) {
@@ -147,13 +148,13 @@ export default function AdminLayout() {
       <aside className={`flex flex-col border-r border-[var(--color-border)] bg-white transition-all duration-300 ${sidebarCollapsed ? 'w-20' : 'w-64'}`}>
         <div className="flex items-center justify-between border-b border-[var(--color-border)] px-5 py-4">
           <div className="flex items-center gap-2.5">
-            <div className="flex size-9 items-center justify-center rounded-lg bg-[var(--color-primary)] text-sm font-bold text-white shadow-sm">D</div>
-            {!sidebarCollapsed && (
-              <div>
-                <h1 className="text-sm font-bold text-[var(--color-primary)]">DPE Admin</h1>
-                <p className="text-[10px] text-[var(--color-muted)]">Engine Solutions</p>
-              </div>
-            )}
+              <div className="flex size-9 items-center justify-center rounded-lg bg-[var(--color-primary)] text-sm font-bold text-white shadow-sm">{user?.full_name?.[0]?.toUpperCase() || 'D'}</div>
+              {!sidebarCollapsed && (
+                <div>
+                  <h1 className="text-sm font-bold text-[var(--color-primary)]">DPE Admin</h1>
+                  <p className="text-[10px] text-[var(--color-muted)]">Engine Solutions</p>
+                </div>
+              )}
           </div>
           <button onClick={() => setSidebarCollapsed(!sidebarCollapsed)} className="flex size-7 items-center justify-center rounded-lg text-[var(--color-muted)] transition-colors hover:bg-[var(--color-bg)] hover:text-[var(--color-text)]">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -231,6 +232,10 @@ export default function AdminLayout() {
               </div>
             </div>
           )}
+          <NavLink to="/admin/profile" className={({ isActive }) => `flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${sidebarCollapsed ? 'justify-center' : ''} ${isActive ? 'bg-[var(--color-primary)]/10 text-[var(--color-primary)]' : 'text-[var(--color-muted)] hover:bg-[var(--color-bg)]'}`}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            {!sidebarCollapsed && 'Profile'}
+          </NavLink>
           <button onClick={() => { setPassError(''); setPassSuccess(false); setShowPasswordModal(true) }} className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-[var(--color-muted)] transition-colors hover:bg-[var(--color-bg)] ${sidebarCollapsed ? 'justify-center' : ''}`}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0110 0v4" /></svg>
             {!sidebarCollapsed && 'Change Password'}

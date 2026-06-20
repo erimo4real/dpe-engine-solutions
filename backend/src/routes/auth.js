@@ -33,7 +33,7 @@ router.post('/login', async (req, res) => {
     const token = generateToken(user.id, user.token_version)
     res.cookie('token', token, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 })
 
-    res.json({ success: true, user: { id: user.id, username: user.username } })
+    res.json({ success: true, user: { id: user.id, username: user.username, email: user.email, full_name: user.full_name } })
   } catch (err) {
     res.status(500).json({ error: 'Server error' })
   }
@@ -148,11 +148,149 @@ router.post('/reset-password', async (req, res) => {
 router.get('/me', authMiddleware, async (req, res) => {
   const { data: user } = await supabase
     .from('users')
-    .select('id, username')
+    .select('id, username, email, full_name')
     .eq('id', req.userId)
     .single()
   if (!user) return res.status(401).json({ error: 'User not found' })
   res.json({ user })
+})
+
+// Update own profile
+router.put('/profile', authMiddleware, async (req, res) => {
+  try {
+    const { full_name, email } = req.body
+    const updates = {}
+    if (full_name !== undefined) updates.full_name = full_name
+    if (email !== undefined) updates.email = email
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ error: 'Nothing to update' })
+    }
+
+    const { data: user, error } = await supabase
+      .from('users')
+      .update(updates)
+      .eq('id', req.userId)
+      .select('id, username, email, full_name')
+      .single()
+
+    if (error) return res.status(500).json({ error: error.message })
+    res.json({ user })
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' })
+  }
+})
+
+// --- Admin user management ---
+
+function requireAdmin(req, res, next) {
+  if (req.userId !== 1) {
+    return res.status(403).json({ error: 'Admin access required' })
+  }
+  next()
+}
+
+router.get('/users', authMiddleware, requireAdmin, async (req, res) => {
+  const { data: users, error } = await supabase
+    .from('users')
+    .select('id, username, email, full_name, created_at')
+    .order('id', { ascending: true })
+
+  if (error) return res.status(500).json({ error: error.message })
+  res.json({ users })
+})
+
+router.get('/users/:id', authMiddleware, requireAdmin, async (req, res) => {
+  const { data: user, error } = await supabase
+    .from('users')
+    .select('id, username, email, full_name, created_at')
+    .eq('id', req.params.id)
+    .single()
+
+  if (error || !user) return res.status(404).json({ error: 'User not found' })
+  res.json({ user })
+})
+
+router.post('/users', authMiddleware, requireAdmin, async (req, res) => {
+  try {
+    const { username, password, full_name, email } = req.body
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Username and password required' })
+    }
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters' })
+    }
+
+    const hash = await bcrypt.hash(password, 10)
+    const { data: user, error } = await supabase
+      .from('users')
+      .insert([{ username, password_hash: hash, full_name, email }])
+      .select('id, username, email, full_name')
+      .single()
+
+    if (error) {
+      if (error.message?.includes('duplicate')) {
+        return res.status(400).json({ error: 'Username already exists' })
+      }
+      return res.status(500).json({ error: error.message })
+    }
+    res.status(201).json({ user })
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' })
+  }
+})
+
+router.put('/users/:id', authMiddleware, requireAdmin, async (req, res) => {
+  try {
+    const { username, full_name, email, password } = req.body
+    const updates = {}
+    if (username !== undefined) updates.username = username
+    if (full_name !== undefined) updates.full_name = full_name
+    if (email !== undefined) updates.email = email
+    if (password) {
+      if (password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' })
+      updates.password_hash = await bcrypt.hash(password, 10)
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ error: 'Nothing to update' })
+    }
+
+    const { data: user, error } = await supabase
+      .from('users')
+      .update(updates)
+      .eq('id', req.params.id)
+      .select('id, username, email, full_name')
+      .single()
+
+    if (error) {
+      if (error.message?.includes('duplicate')) {
+        return res.status(400).json({ error: 'Username already exists' })
+      }
+      return res.status(500).json({ error: error.message })
+    }
+    if (!user) return res.status(404).json({ error: 'User not found' })
+    res.json({ user })
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' })
+  }
+})
+
+router.delete('/users/:id', authMiddleware, requireAdmin, async (req, res) => {
+  try {
+    if (parseInt(req.params.id) === req.userId) {
+      return res.status(400).json({ error: 'Cannot delete your own account' })
+    }
+    const { error } = await supabase
+      .from('users')
+      .delete()
+      .eq('id', req.params.id)
+
+    if (error) return res.status(500).json({ error: error.message })
+    res.json({ success: true })
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' })
+  }
 })
 
 export default router

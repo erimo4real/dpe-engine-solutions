@@ -54,6 +54,14 @@ export const api = {
     update: (id, body) => request(`/api/inquiries/${id}`, { method: 'PUT', body }),
     delete: (id) => request(`/api/inquiries/${id}`, { method: 'DELETE' }),
   },
+  users: {
+    list: () => request('/api/auth/users'),
+    get: (id) => request(`/api/auth/users/${id}`),
+    create: (body) => request('/api/auth/users', { method: 'POST', body }),
+    update: (id, body) => request(`/api/auth/users/${id}`, { method: 'PUT', body }),
+    delete: (id) => request(`/api/auth/users/${id}`, { method: 'DELETE' }),
+    updateProfile: (body) => request('/api/auth/profile', { method: 'PUT', body }),
+  },
   upload: (file) => {
     const formData = new FormData()
     formData.append('image', file)

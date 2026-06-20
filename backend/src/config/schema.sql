@@ -31,6 +31,8 @@ CREATE TABLE IF NOT EXISTS inquiries (
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
   username TEXT NOT NULL UNIQUE,
+  email TEXT,
+  full_name TEXT,
   password_hash TEXT NOT NULL,
   token_version INTEGER DEFAULT 0,
   created_at TIMESTAMPTZ DEFAULT NOW()
@@ -44,6 +46,10 @@ CREATE TABLE IF NOT EXISTS password_reset_tokens (
   used BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Migration: add columns to users (safe to run on existing tables)
+ALTER TABLE users ADD COLUMN IF NOT EXISTS email TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS full_name TEXT;
 
 -- Seed categories
 INSERT INTO categories (name, slug, sort_order) VALUES
