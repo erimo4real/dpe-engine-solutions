@@ -3,10 +3,12 @@ import { supabase } from '../config/supabase.js'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-in-production'
 
+const isProduction = process.env.NODE_ENV === 'production' || !!process.env.RENDER
+
 export const cookieOptions = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+  secure: isProduction,
+  sameSite: isProduction ? 'none' : 'lax',
   path: '/',
 }
 

@@ -26,8 +26,12 @@ const inquiryLimiter = rateLimit({
   message: { error: 'Too many submissions, try again later' },
 })
 
+const isProduction = process.env.NODE_ENV === 'production' || !!process.env.RENDER
+const VERCEL_URL = 'https://dpe-engine-solutions.vercel.app'
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: isProduction
+    ? [process.env.CLIENT_URL, VERCEL_URL].filter(Boolean)
+    : process.env.CLIENT_URL || 'http://localhost:5173',
   credentials: true,
 }))
 app.use(express.json())
