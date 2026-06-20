@@ -171,7 +171,7 @@ router.put('/profile', authMiddleware, async (req, res) => {
       return res.status(400).json({ error: 'Nothing to update' })
     }
 
-    if (avatar_url) {
+    if (avatar_url !== undefined) {
       const { data: current } = await supabase
         .from('users')
         .select('avatar_url')
@@ -297,12 +297,24 @@ router.delete('/users/:id', authMiddleware, requireAdmin, async (req, res) => {
     if (parseInt(req.params.id) === req.userId) {
       return res.status(400).json({ error: 'Cannot delete your own account' })
     }
+
+    const { data: user } = await supabase
+      .from('users')
+      .select('avatar_url')
+      .eq('id', req.params.id)
+      .single()
+
     const { error } = await supabase
       .from('users')
       .delete()
       .eq('id', req.params.id)
 
     if (error) return res.status(500).json({ error: error.message })
+
+    if (user?.avatar_url) {
+      await deleteCloudinaryImage(user.avatar_url)
+    }
+
     res.json({ success: true })
   } catch (err) {
     res.status(500).json({ error: 'Server error' })
