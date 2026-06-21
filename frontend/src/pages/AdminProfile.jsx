@@ -49,7 +49,7 @@ export default function AdminProfile() {
   }
 
   return (
-    <div>
+    <div className="animate-fade-slide-in">
       <Helmet><title>Profile | DPE Admin</title></Helmet>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-[var(--color-text)]">My Profile</h1>

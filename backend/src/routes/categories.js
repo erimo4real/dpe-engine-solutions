@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { supabase } from '../config/supabase.js'
-import { authMiddleware } from '../middleware/auth.js'
+import { authMiddleware, requireAdmin } from '../middleware/auth.js'
 
 const router = Router()
 
@@ -10,14 +10,14 @@ router.get('/', async (req, res) => {
       .from('categories')
       .select('*')
       .order('sort_order', { ascending: true })
-    if (error) return res.status(500).json({ error: error.message })
+    if (error) return res.status(500).json({ error: 'Server error' })
     res.json({ categories: data })
   } catch (err) {
     res.status(500).json({ error: 'Server error' })
   }
 })
 
-router.post('/', authMiddleware, async (req, res) => {
+router.post('/', authMiddleware, requireAdmin, async (req, res) => {
   try {
     const { name, slug, sort_order } = req.body
     if (!name || !slug) {
@@ -28,14 +28,14 @@ router.post('/', authMiddleware, async (req, res) => {
       .insert([{ name, slug, sort_order }])
       .select()
       .single()
-    if (error) return res.status(500).json({ error: error.message })
+    if (error) return res.status(500).json({ error: 'Server error' })
     res.status(201).json({ category: data })
   } catch (err) {
     res.status(500).json({ error: 'Server error' })
   }
 })
 
-router.put('/:id', authMiddleware, async (req, res) => {
+router.put('/:id', authMiddleware, requireAdmin, async (req, res) => {
   try {
     const { name, slug, sort_order } = req.body
     const { data, error } = await supabase
@@ -44,20 +44,20 @@ router.put('/:id', authMiddleware, async (req, res) => {
       .eq('id', req.params.id)
       .select()
       .single()
-    if (error) return res.status(500).json({ error: error.message })
+    if (error) return res.status(500).json({ error: 'Server error' })
     res.json({ category: data })
   } catch (err) {
     res.status(500).json({ error: 'Server error' })
   }
 })
 
-router.delete('/:id', authMiddleware, async (req, res) => {
+router.delete('/:id', authMiddleware, requireAdmin, async (req, res) => {
   try {
     const { error } = await supabase
       .from('categories')
       .delete()
       .eq('id', req.params.id)
-    if (error) return res.status(500).json({ error: error.message })
+    if (error) return res.status(500).json({ error: 'Server error' })
     res.json({ success: true })
   } catch (err) {
     res.status(500).json({ error: 'Server error' })

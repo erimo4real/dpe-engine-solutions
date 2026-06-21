@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { fetchInquiries, updateInquiryStatus, deleteInquiry } from '../features/inquiries/inquiriesSlice'
 import Pagination from '../components/Pagination'
+import ConfirmModal from '../components/ConfirmModal'
 
 const PAGE_SIZE = 6
 
@@ -11,6 +12,8 @@ export default function AdminInquiries() {
   const [expanded, setExpanded] = useState(null)
   const [page, setPage] = useState(1)
   const [showArchived, setShowArchived] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState(null)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => { dispatch(fetchInquiries()) }, [dispatch])
 
@@ -22,9 +25,12 @@ export default function AdminInquiries() {
 
   useEffect(() => { setExpanded(null) }, [page])
 
-  const handleDelete = (id) => {
-    if (!confirm('Delete this inquiry?')) return
-    dispatch(deleteInquiry(id))
+  const handleDelete = async () => {
+    if (!deleteTarget) return
+    setDeleting(true)
+    await dispatch(deleteInquiry(deleteTarget))
+    setDeleteTarget(null)
+    setDeleting(false)
   }
 
   const statusColors = {
@@ -36,7 +42,7 @@ export default function AdminInquiries() {
   }
 
   return (
-    <div>
+    <div className="animate-fade-slide-in">
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-[var(--color-text)]">Inquiries</h1>
@@ -110,7 +116,7 @@ export default function AdminInquiries() {
                           <button onClick={() => dispatch(updateInquiryStatus({ id: inq.id, status: 'spam' }))} className="rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-[11px] font-medium text-[var(--color-error)] transition-colors hover:bg-[var(--color-error)]/10">Spam</button>
                         </>
                       )}
-                      <button onClick={() => handleDelete(inq.id)} className="rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-[11px] font-medium text-[var(--color-error)] transition-colors hover:bg-[var(--color-error)]/10">Delete</button>
+                      <button onClick={() => setDeleteTarget(inq.id)} className="rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-[11px] font-medium text-[var(--color-error)] transition-colors hover:bg-[var(--color-error)]/10">Delete</button>
                     </div>
                   </div>
                 </div>
@@ -120,6 +126,16 @@ export default function AdminInquiries() {
           <Pagination page={page} totalPages={totalPages} onChange={setPage} />
         </div>
       )}
+
+      <ConfirmModal
+        open={!!deleteTarget}
+        title="Delete Inquiry"
+        message="Are you sure you want to delete this inquiry? This action cannot be undone."
+        confirmLabel="Delete"
+        loading={deleting}
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   )
 }

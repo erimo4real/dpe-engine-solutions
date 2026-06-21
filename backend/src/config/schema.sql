@@ -51,6 +51,7 @@ CREATE TABLE IF NOT EXISTS password_reset_tokens (
 ALTER TABLE users ADD COLUMN IF NOT EXISTS email TEXT;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS full_name TEXT;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT DEFAULT 'admin';
 
 -- Seed categories
 INSERT INTO categories (name, slug, sort_order) VALUES

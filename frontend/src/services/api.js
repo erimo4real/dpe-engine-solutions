@@ -4,7 +4,7 @@ async function request(endpoint, options = {}) {
   const url = `${API_URL}${endpoint}`
   const config = {
     credentials: 'include',
-    headers: { 'Content-Type': 'application/json', ...options.headers },
+    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest', ...options.headers },
     ...options,
   }
   if (config.body && typeof config.body === 'object' && !(config.body instanceof FormData)) {

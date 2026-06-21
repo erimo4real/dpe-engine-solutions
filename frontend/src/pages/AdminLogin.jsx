@@ -102,7 +102,7 @@ export default function AdminLogin() {
   return (
     <>
       <Helmet><title>Admin Login | DPE Engine Solutions</title></Helmet>
-      <div className="flex min-h-screen items-center justify-center bg-[var(--color-bg)] px-4">
+      <div className="flex min-h-screen items-center justify-center bg-[var(--color-bg)] px-4 animate-fade-in">
         <div className="w-full max-w-sm">
           <div className="mb-8 text-center">
             <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary-light)] text-2xl font-bold text-white shadow-lg">D</div>

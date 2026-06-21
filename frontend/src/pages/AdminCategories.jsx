@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { fetchCategories, createCategory, updateCategory, deleteCategory } from '../features/categories/categoriesSlice'
 import Pagination from '../components/Pagination'
+import ConfirmModal from '../components/ConfirmModal'
 
 const PAGE_SIZE = 6
 
@@ -12,6 +13,7 @@ export default function AdminCategories() {
   const [editing, setEditing] = useState(null)
   const [form, setForm] = useState({ name: '', slug: '', sort_order: '0' })
   const [page, setPage] = useState(1)
+  const [deleteTarget, setDeleteTarget] = useState(null)
   const slugManuallyEdited = useRef(false)
 
   useEffect(() => { dispatch(fetchCategories()) }, [dispatch])
@@ -34,17 +36,17 @@ export default function AdminCategories() {
         await dispatch(createCategory(body)).unwrap()
       }
       setShowForm(false)
-    } catch { alert('Failed to save category') }
+    } catch { }
   }
 
-  const handleDelete = async (id) => {
-    if (!confirm('Delete this category? Related products may lose their category association.')) return
-    try { await dispatch(deleteCategory(id)).unwrap() }
-    catch { alert('Failed to delete category') }
+  const handleDelete = async () => {
+    if (!deleteTarget) return
+    try { await dispatch(deleteCategory(deleteTarget)).unwrap(); setDeleteTarget(null) }
+    catch { setDeleteTarget(null) }
   }
 
   return (
-    <div>
+    <div className="animate-fade-slide-in">
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-[var(--color-text)]">Categories</h1>
@@ -83,7 +85,7 @@ export default function AdminCategories() {
                   <td className="px-5 py-4 text-right">
                     <div className="flex justify-end gap-2">
                       <button onClick={() => openEdit(c)} className="rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-[11px] font-medium text-[var(--color-muted)] transition-colors hover:bg-[var(--color-bg)]">Edit</button>
-                      <button onClick={() => handleDelete(c.id)} disabled={deleting === c.id} className="rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-[11px] font-medium text-[var(--color-error)] transition-colors hover:bg-red-50 disabled:opacity-50">{deleting === c.id ? 'Deleting...' : 'Delete'}</button>
+                      <button onClick={() => setDeleteTarget(c.id)} disabled={deleting === c.id} className="rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-[11px] font-medium text-[var(--color-error)] transition-colors hover:bg-red-50 disabled:opacity-50">{deleting === c.id ? 'Deleting...' : 'Delete'}</button>
                     </div>
                   </td>
                 </tr>
@@ -96,9 +98,19 @@ export default function AdminCategories() {
         </div>
       )}
 
+      <ConfirmModal
+        open={!!deleteTarget}
+        title="Delete Category"
+        message="Are you sure you want to delete this category? Products in this category may lose their category association. This action cannot be undone."
+        confirmLabel="Delete"
+        loading={deleting === deleteTarget}
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
+
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4" onClick={() => setShowForm(false)}>
-          <div className="w-full max-w-md rounded-xl border border-[var(--color-border)] bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4 animate-fade-in" onClick={() => setShowForm(false)}>
+          <div className="w-full max-w-md rounded-xl border border-[var(--color-border)] bg-white p-6 shadow-xl animate-scale-in" onClick={(e) => e.stopPropagation()}>
             <h2 className="mb-4 text-base font-bold text-[var(--color-text)]">{editing ? 'Edit Category' : 'Add Category'}</h2>
             <form onSubmit={handleSave} className="space-y-3.5">
               <div>

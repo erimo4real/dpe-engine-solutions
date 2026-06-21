@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { supabase } from '../config/supabase.js'
-import { authMiddleware } from '../middleware/auth.js'
+import { authMiddleware, requireAdmin } from '../middleware/auth.js'
 import { deleteCloudinaryImage } from '../config/cloudinary.js'
 
 const router = Router()
@@ -23,7 +23,7 @@ router.get('/', async (req, res) => {
     }
 
     const { data, error } = await query
-    if (error) return res.status(500).json({ error: error.message })
+    if (error) return res.status(500).json({ error: 'Server error' })
     res.json({ products: data })
   } catch (err) {
     res.status(500).json({ error: 'Server error' })
@@ -44,7 +44,7 @@ router.get('/:id', async (req, res) => {
   }
 })
 
-router.post('/', authMiddleware, async (req, res) => {
+router.post('/', authMiddleware, requireAdmin, async (req, res) => {
   try {
     const { name, description, specs, image_url, category_id, sort_order } = req.body
     if (!name || !category_id) {
@@ -55,14 +55,14 @@ router.post('/', authMiddleware, async (req, res) => {
       .insert([{ name, description, specs, image_url, category_id, sort_order }])
       .select()
       .single()
-    if (error) return res.status(500).json({ error: error.message })
+    if (error) return res.status(500).json({ error: 'Server error' })
     res.status(201).json({ product: data })
   } catch (err) {
     res.status(500).json({ error: 'Server error' })
   }
 })
 
-router.put('/:id', authMiddleware, async (req, res) => {
+router.put('/:id', authMiddleware, requireAdmin, async (req, res) => {
   try {
     const { name, description, specs, image_url, category_id, sort_order } = req.body
 
@@ -82,14 +82,14 @@ router.put('/:id', authMiddleware, async (req, res) => {
       .eq('id', req.params.id)
       .select()
       .single()
-    if (error) return res.status(500).json({ error: error.message })
+    if (error) return res.status(500).json({ error: 'Server error' })
     res.json({ product: data })
   } catch (err) {
     res.status(500).json({ error: 'Server error' })
   }
 })
 
-router.delete('/:id', authMiddleware, async (req, res) => {
+router.delete('/:id', authMiddleware, requireAdmin, async (req, res) => {
   try {
     const { data: existing } = await supabase
       .from('products')
@@ -101,7 +101,7 @@ router.delete('/:id', authMiddleware, async (req, res) => {
       .from('products')
       .delete()
       .eq('id', req.params.id)
-    if (error) return res.status(500).json({ error: error.message })
+    if (error) return res.status(500).json({ error: 'Server error' })
 
     if (existing?.image_url) {
       await deleteCloudinaryImage(existing.image_url)

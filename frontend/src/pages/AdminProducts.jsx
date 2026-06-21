@@ -4,6 +4,7 @@ import { fetchProducts, createProduct, updateProduct, deleteProduct } from '../f
 import { fetchCategories } from '../features/categories/categoriesSlice'
 import { api } from '../services/api'
 import Pagination from '../components/Pagination'
+import ConfirmModal from '../components/ConfirmModal'
 
 const PAGE_SIZE = 6
 
@@ -16,6 +17,7 @@ export default function AdminProducts() {
   const [uploading, setUploading] = useState(false)
   const [form, setForm] = useState({ name: '', description: '', specs: '', image_url: '', category_id: '', sort_order: '0' })
   const [page, setPage] = useState(1)
+  const [deleteTarget, setDeleteTarget] = useState(null)
 
   useEffect(() => {
     dispatch(fetchProducts())
@@ -48,7 +50,7 @@ export default function AdminProducts() {
     if (!file) return
     setUploading(true)
     try { const data = await api.upload(file); setForm((f) => ({ ...f, image_url: data.url })) }
-    catch { alert('Upload failed') }
+    catch { }
     finally { setUploading(false) }
   }
 
@@ -62,16 +64,17 @@ export default function AdminProducts() {
     try {
       editing ? await dispatch(updateProduct({ id: editing, ...body })).unwrap() : await dispatch(createProduct(body)).unwrap()
       setShowForm(false)
-    } catch { alert('Failed to save product') }
+    } catch { }
   }
 
-  const handleDelete = async (id) => {
-    if (!confirm('Delete this product?')) return
-    try { await dispatch(deleteProduct(id)).unwrap() } catch { alert('Failed to delete product') }
+  const handleDelete = async () => {
+    if (!deleteTarget) return
+    try { await dispatch(deleteProduct(deleteTarget)).unwrap(); setDeleteTarget(null) }
+    catch { setDeleteTarget(null) }
   }
 
   return (
-    <div>
+    <div className="animate-fade-slide-in">
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-[var(--color-text)]">Products</h1>
@@ -113,7 +116,7 @@ export default function AdminProducts() {
                   <td className="px-5 py-4 text-right">
                     <div className="flex justify-end gap-2">
                       <button onClick={() => openEdit(p)} className="rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-[11px] font-medium text-[var(--color-muted)] transition-colors hover:bg-[var(--color-bg)]">Edit</button>
-                      <button onClick={() => handleDelete(p.id)} disabled={deleting === p.id} className="rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-[11px] font-medium text-[var(--color-error)] transition-colors hover:bg-[var(--color-error)]/10 disabled:opacity-50">{deleting === p.id ? 'Deleting...' : 'Delete'}</button>
+                      <button onClick={() => setDeleteTarget(p.id)} disabled={deleting === p.id} className="rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-[11px] font-medium text-[var(--color-error)] transition-colors hover:bg-[var(--color-error)]/10 disabled:opacity-50">{deleting === p.id ? 'Deleting...' : 'Delete'}</button>
                     </div>
                   </td>
                 </tr>
@@ -126,9 +129,19 @@ export default function AdminProducts() {
         </div>
       )}
 
+      <ConfirmModal
+        open={!!deleteTarget}
+        title="Delete Product"
+        message="Are you sure you want to delete this product? This action cannot be undone."
+        confirmLabel="Delete"
+        loading={deleting === deleteTarget}
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
+
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4" onClick={() => setShowForm(false)}>
-          <div className="w-full max-w-lg rounded-xl border border-[var(--color-border)] bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4 animate-fade-in" onClick={() => setShowForm(false)}>
+          <div className="w-full max-w-lg rounded-xl border border-[var(--color-border)] bg-white p-6 shadow-xl animate-scale-in" onClick={(e) => e.stopPropagation()}>
             <h2 className="mb-4 text-base font-bold text-[var(--color-text)]">{editing ? 'Edit Product' : 'Add Product'}</h2>
             <form onSubmit={handleSave} className="space-y-3.5">
               <div>

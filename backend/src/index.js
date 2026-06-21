@@ -2,6 +2,7 @@ import 'dotenv/config'
 import express from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
+import helmet from 'helmet'
 import rateLimit from 'express-rate-limit'
 import { createServer } from 'http'
 import authRoutes from './routes/auth.js'
@@ -26,8 +27,26 @@ const inquiryLimiter = rateLimit({
   message: { error: 'Too many submissions, try again later' },
 })
 
+const passwordResetLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: { error: 'Too many password reset attempts, try again later' },
+})
+
+const uploadLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  message: { error: 'Too many uploads, try again later' },
+})
+
 const isProduction = process.env.NODE_ENV === 'production' || !!process.env.RENDER
 const VERCEL_URL = 'https://dpe-engine-solutions.vercel.app'
+
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+  contentSecurityPolicy: false,
+}))
+
 app.use(cors({
   origin: isProduction
     ? [process.env.CLIENT_URL, VERCEL_URL].filter(Boolean)
@@ -37,7 +56,10 @@ app.use(cors({
 app.use(express.json())
 app.use(cookieParser())
 app.use('/api/auth/login', authLimiter)
+app.use('/api/auth/forgot-password', passwordResetLimiter)
+app.use('/api/auth/reset-password', passwordResetLimiter)
 app.use('/api/inquiries', inquiryLimiter)
+app.use('/api/upload', uploadLimiter)
 
 app.use('/api/auth', authRoutes)
 app.use('/api/products', productRoutes)

@@ -1,13 +1,20 @@
 import { Router } from 'express'
 import bcrypt from 'bcryptjs'
-import jwt from 'jsonwebtoken'
+import crypto from 'crypto'
 import { supabase } from '../config/supabase.js'
-import { generateToken, authMiddleware, cookieOptions } from '../middleware/auth.js'
+import { generateToken, authMiddleware, requireAdmin, cookieOptions } from '../middleware/auth.js'
 import { deleteCloudinaryImage } from '../config/cloudinary.js'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-in-production'
-
 const router = Router()
+
+function sanitize(str) {
+  if (!str) return str
+  return str.replace(/<[^>]*>/g, '').trim()
+}
+
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+}
 
 router.post('/login', async (req, res) => {
   try {
@@ -19,7 +26,7 @@ router.post('/login', async (req, res) => {
     const { data: user, error } = await supabase
       .from('users')
       .select('*')
-      .eq('username', username)
+      .eq('username', sanitize(username))
       .single()
 
     if (error || !user) {
@@ -31,7 +38,7 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' })
     }
 
-    const token = generateToken(user.id, user.token_version)
+    const token = generateToken(user.id, user.token_version, user.role || 'admin')
     res.cookie('token', token, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 })
 
     res.json({ success: true, user: { id: user.id, username: user.username, email: user.email, full_name: user.full_name } })
@@ -82,7 +89,7 @@ router.put('/password', authMiddleware, async (req, res) => {
       .update({ password_hash: hash, token_version: newVersion })
       .eq('id', req.userId)
 
-    if (updateError) return res.status(500).json({ error: updateError.message })
+    if (updateError) return res.status(500).json({ error: 'Server error' })
     res.json({ success: true })
   } catch (err) {
     res.status(500).json({ error: 'Server error' })
@@ -101,10 +108,10 @@ router.post('/forgot-password', async (req, res) => {
       .single()
 
     if (user) {
-      const token = Math.random().toString(36).slice(2, 8).toUpperCase()
+      const token = crypto.randomBytes(3).toString('hex').toUpperCase()
       const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString()
       await supabase.from('password_reset_tokens').insert([{ user_id: user.id, token, expires_at: expiresAt }])
-      console.log(`[PASSWORD RESET] Code for "${username}": ${token} (expires in 15min)`)
+      console.log(`[PASSWORD RESET] Code for "${sanitize(username)}": ${token} (expires in 15min)`)
     }
 
     res.json({ success: true, message: 'If the username exists, a reset code has been sent.' })
@@ -153,7 +160,7 @@ router.get('/me', authMiddleware, async (req, res) => {
     .eq('id', req.userId)
     .single()
 
-  if (error) return res.status(500).json({ error: error.message })
+  if (error) return res.status(500).json({ error: 'Server error' })
   if (!user) return res.status(401).json({ error: 'User not found' })
   res.json({ user: { id: user.id, username: user.username, email: user.email || null, full_name: user.full_name || null, avatar_url: user.avatar_url || null } })
 })
@@ -189,7 +196,7 @@ router.put('/profile', authMiddleware, async (req, res) => {
       .select('*')
       .single()
 
-    if (error) return res.status(500).json({ error: error.message })
+    if (error) return res.status(500).json({ error: 'Server error' })
     res.json({ user: { id: user.id, username: user.username, email: user.email || null, full_name: user.full_name || null, avatar_url: user.avatar_url || null } })
   } catch (err) {
     res.status(500).json({ error: 'Server error' })
@@ -198,20 +205,13 @@ router.put('/profile', authMiddleware, async (req, res) => {
 
 // --- Admin user management ---
 
-function requireAdmin(req, res, next) {
-  if (req.userId !== 1) {
-    return res.status(403).json({ error: 'Admin access required' })
-  }
-  next()
-}
-
 router.get('/users', authMiddleware, requireAdmin, async (req, res) => {
   const { data: users, error } = await supabase
     .from('users')
     .select('*')
     .order('id', { ascending: true })
 
-  if (error) return res.status(500).json({ error: error.message })
+  if (error) return res.status(500).json({ error: 'Server error' })
   const clean = users.map((u) => ({ id: u.id, username: u.username, email: u.email || null, full_name: u.full_name || null, created_at: u.created_at }))
   res.json({ users: clean })
 })
@@ -240,7 +240,7 @@ router.post('/users', authMiddleware, requireAdmin, async (req, res) => {
     const hash = await bcrypt.hash(password, 10)
     const { data: user, error } = await supabase
       .from('users')
-      .insert([{ username, password_hash: hash, full_name, email }])
+      .insert([{ username, password_hash: hash, full_name, email, role: 'admin' }])
       .select('*')
       .single()
 
@@ -248,7 +248,7 @@ router.post('/users', authMiddleware, requireAdmin, async (req, res) => {
       if (error.message?.includes('duplicate')) {
         return res.status(400).json({ error: 'Username already exists' })
       }
-      return res.status(500).json({ error: error.message })
+      return res.status(500).json({ error: 'Server error' })
     }
     res.status(201).json({ user: { id: user.id, username: user.username, email: user.email || null, full_name: user.full_name || null } })
   } catch (err) {
@@ -283,7 +283,7 @@ router.put('/users/:id', authMiddleware, requireAdmin, async (req, res) => {
       if (error.message?.includes('duplicate')) {
         return res.status(400).json({ error: 'Username already exists' })
       }
-      return res.status(500).json({ error: error.message })
+      return res.status(500).json({ error: 'Server error' })
     }
     if (!user) return res.status(404).json({ error: 'User not found' })
     res.json({ user: { id: user.id, username: user.username, email: user.email || null, full_name: user.full_name || null } })
@@ -309,7 +309,7 @@ router.delete('/users/:id', authMiddleware, requireAdmin, async (req, res) => {
       .delete()
       .eq('id', req.params.id)
 
-    if (error) return res.status(500).json({ error: error.message })
+    if (error) return res.status(500).json({ error: 'Server error' })
 
     if (user?.avatar_url) {
       await deleteCloudinaryImage(user.avatar_url)

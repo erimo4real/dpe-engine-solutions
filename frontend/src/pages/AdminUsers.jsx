@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { api } from '../services/api'
 import Pagination from '../components/Pagination'
+import ConfirmModal from '../components/ConfirmModal'
 
 const PAGE_SIZE = 10
 const FRONTEND_URL = 'https://dpe-engine-solutions.vercel.app'
@@ -16,6 +17,8 @@ export default function AdminUsers() {
   const [page, setPage] = useState(1)
   const [credentials, setCredentials] = useState(null)
   const [copied, setCopied] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState(null)
+  const [deleting, setDeleting] = useState(false)
   const textRef = useRef(null)
 
   const loadUsers = async () => {
@@ -90,14 +93,16 @@ export default function AdminUsers() {
     } catch { }
   }
 
-  const handleDelete = async (id) => {
-    if (!confirm('Delete this user?')) return
-    try { await api.users.delete(id); loadUsers() }
-    catch (err) { alert(err.message) }
+  const handleDelete = async () => {
+    if (!deleteTarget) return
+    setDeleting(true)
+    try { await api.users.delete(deleteTarget); setDeleteTarget(null); loadUsers() }
+    catch { }
+    finally { setDeleting(false) }
   }
 
   return (
-    <div>
+    <div className="animate-fade-slide-in">
       <Helmet><title>Users | DPE Admin</title></Helmet>
       <div className="mb-6 flex items-center justify-between">
         <div>
@@ -143,7 +148,7 @@ export default function AdminUsers() {
                   <td className="px-5 py-4 text-right">
                     <div className="flex justify-end gap-2">
                       <button onClick={() => openEdit(u)} className="rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-[11px] font-medium text-[var(--color-muted)] transition-colors hover:bg-[var(--color-bg)]">Edit</button>
-                      <button onClick={() => handleDelete(u.id)} disabled={loading} className="rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-[11px] font-medium text-[var(--color-error)] transition-colors hover:bg-[var(--color-error)]/10 disabled:opacity-50">Delete</button>
+                      <button onClick={() => setDeleteTarget(u.id)} disabled={loading} className="rounded-lg border border-[var(--color-border)] px-3 py-1.5 text-[11px] font-medium text-[var(--color-error)] transition-colors hover:bg-[var(--color-error)]/10 disabled:opacity-50">Delete</button>
                     </div>
                   </td>
                 </tr>
@@ -156,9 +161,19 @@ export default function AdminUsers() {
         </div>
       )}
 
+      <ConfirmModal
+        open={!!deleteTarget}
+        title="Delete User"
+        message="Are you sure you want to delete this user? This action cannot be undone."
+        confirmLabel="Delete"
+        loading={deleting}
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
+
       {showForm && !editing && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4" onClick={() => { setShowForm(false); setCredentials(null) }}>
-          <div className="w-full max-w-md rounded-xl border border-[var(--color-border)] bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4 animate-fade-in" onClick={() => { setShowForm(false); setCredentials(null) }}>
+          <div className="w-full max-w-md rounded-xl border border-[var(--color-border)] bg-white p-6 shadow-xl animate-scale-in" onClick={(e) => e.stopPropagation()}>
             <h2 className="mb-4 text-base font-bold text-[var(--color-text)]">Add User</h2>
             <form onSubmit={handleSave} className="space-y-3.5">
               <div>
@@ -191,8 +206,8 @@ export default function AdminUsers() {
       )}
 
       {showForm && editing && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4" onClick={() => setShowForm(false)}>
-          <div className="w-full max-w-md rounded-xl border border-[var(--color-border)] bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4 animate-fade-in" onClick={() => setShowForm(false)}>
+          <div className="w-full max-w-md rounded-xl border border-[var(--color-border)] bg-white p-6 shadow-xl animate-scale-in" onClick={(e) => e.stopPropagation()}>
             <h2 className="mb-4 text-base font-bold text-[var(--color-text)]">Edit User</h2>
             <form onSubmit={handleSave} className="space-y-3.5">
               <div>
@@ -225,8 +240,8 @@ export default function AdminUsers() {
       )}
 
       {credentials && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4" onClick={() => setCredentials(null)}>
-          <div className="w-full max-w-lg rounded-xl border border-[var(--color-border)] bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4 animate-fade-in" onClick={() => setCredentials(null)}>
+          <div className="w-full max-w-lg rounded-xl border border-[var(--color-border)] bg-white p-6 shadow-xl animate-scale-in" onClick={(e) => e.stopPropagation()}>
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-base font-bold text-[var(--color-text)]">User Created — Send Credentials</h2>
               <button onClick={() => setCredentials(null)} className="rounded-lg p-1.5 text-[var(--color-muted)] transition-colors hover:bg-[var(--color-bg)]">

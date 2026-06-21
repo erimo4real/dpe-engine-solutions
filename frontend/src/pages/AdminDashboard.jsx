@@ -1,9 +1,14 @@
-import { useEffect } from 'react'
+import { useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Helmet } from 'react-helmet-async'
 import { updateInquiryStatus } from '../features/inquiries/inquiriesSlice'
-import { fetchProducts } from '../features/products/productsSlice'
-import { fetchCategories } from '../features/categories/categoriesSlice'
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
+
+const categoryColors = {
+  Generators: '#1e3a5f',
+  'Engine Parts': '#d97706',
+  Engines: '#16a34a',
+}
 
 const statCards = [
   { key: 'new', label: 'New Inquiries', color: 'bg-[var(--color-primary)]', icon: '<circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />' },
@@ -12,18 +17,14 @@ const statCards = [
   { key: 'categories', label: 'Categories', color: 'bg-[var(--color-secondary)]', icon: '<path d="M4 6h16M4 12h16M4 18h16" />' },
 ]
 
+const chartColors = ['#1e3a5f', '#2a5298', '#d97706', '#16a34a', '#dc2626', '#7c3aed', '#0891b2', '#ca8a04', '#be185d', '#65a30d']
+
 export default function AdminDashboard() {
   const dispatch = useDispatch()
   const { user } = useSelector((s) => s.auth)
   const { items: inquiries, loading: inquiriesLoading } = useSelector((s) => s.inquiries)
   const { items: products } = useSelector((s) => s.products)
   const { items: categories } = useSelector((s) => s.categories)
-
-  useEffect(() => {
-    if (!user) return
-    dispatch(fetchProducts())
-    dispatch(fetchCategories())
-  }, [dispatch, user])
 
   const stats = {
     new: inquiries.filter((i) => i.status === 'new').length,
@@ -32,8 +33,31 @@ export default function AdminDashboard() {
     categories: categories.length,
   }
 
+  const categorySpecs = useMemo(() => {
+    return categories.map((cat) => {
+      const catProducts = products.filter((p) => p.category_id === cat.id)
+      const specCount = {}
+      catProducts.forEach((p) => {
+        if (Array.isArray(p.specs)) {
+          p.specs.forEach((s) => {
+            const key = s.trim()
+            if (key) specCount[key] = (specCount[key] || 0) + 1
+          })
+        }
+      })
+      return {
+        ...cat,
+        productCount: catProducts.length,
+        specs: Object.entries(specCount)
+          .map(([spec, count]) => ({ spec, count }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 10),
+      }
+    })
+  }, [categories, products])
+
   return (
-    <div>
+    <div className="animate-fade-slide-in">
       <Helmet><title>Dashboard | DPE Admin</title></Helmet>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-[var(--color-text)]">Dashboard</h1>
@@ -55,6 +79,49 @@ export default function AdminDashboard() {
           </div>
         ))}
       </div>
+
+      {products.length > 0 && (
+        <div className="mb-8">
+          <h2 className="mb-4 text-sm font-bold text-[var(--color-text)]">Product Specs by Category</h2>
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {categorySpecs.map((cat) => {
+              const color = categoryColors[cat.name] || chartColors[0]
+              return (
+                <div key={cat.id} className="rounded-xl border border-[var(--color-border)] bg-white p-5 shadow-sm">
+                  <div className="mb-4 flex items-center justify-between">
+                    <div>
+                      <h3 className="text-sm font-bold text-[var(--color-text)]">{cat.name}</h3>
+                      <p className="text-xs text-[var(--color-muted)]">{cat.productCount} product{cat.productCount !== 1 ? 's' : ''}</p>
+                    </div>
+                    <div className="flex size-10 items-center justify-center rounded-lg" style={{ backgroundColor: `${color}15` }}>
+                      <span className="text-lg font-bold" style={{ color }}>{cat.productCount}</span>
+                    </div>
+                  </div>
+                  {cat.specs.length === 0 ? (
+                    <div className="flex h-40 items-center justify-center rounded-lg bg-[var(--color-bg)]">
+                      <p className="text-xs text-[var(--color-muted)]">No spec data</p>
+                    </div>
+                  ) : (
+                    <div className="h-44">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={cat.specs} layout="vertical" margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                          <XAxis type="number" hide />
+                          <YAxis type="category" dataKey="spec" width={90} tick={{ fontSize: 10, fill: '#64748b' }} tickLine={false} axisLine={false} />
+                          <Tooltip
+                            contentStyle={{ borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}
+                            formatter={(value) => [value, 'Products']}
+                          />
+                          <Bar dataKey="count" fill={color} radius={[0, 4, 4, 0]} barSize={12} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       <div className="rounded-xl border border-[var(--color-border)] bg-white shadow-sm">
         <div className="flex items-center justify-between border-b border-[var(--color-border)] px-6 py-4">
