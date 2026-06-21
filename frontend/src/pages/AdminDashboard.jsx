@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Helmet } from 'react-helmet-async'
 import { updateInquiryStatus } from '../features/inquiries/inquiriesSlice'
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 
 const categoryColors = {
   Generators: '#1e3a5f',
@@ -18,6 +18,14 @@ const statCards = [
 ]
 
 const chartColors = ['#1e3a5f', '#2a5298', '#d97706', '#16a34a', '#dc2626', '#7c3aed', '#0891b2', '#ca8a04', '#be185d', '#65a30d']
+
+const statusConfig = {
+  new: { label: 'New', color: '#1e3a5f' },
+  read: { label: 'Read', color: '#64748b' },
+  replied: { label: 'Replied', color: '#16a34a' },
+  archived: { label: 'Archived', color: '#e2e8f0' },
+  spam: { label: 'Spam', color: '#dc2626' },
+}
 
 export default function AdminDashboard() {
   const dispatch = useDispatch()
@@ -55,6 +63,29 @@ export default function AdminDashboard() {
       }
     })
   }, [categories, products])
+
+  const inquiryChartData = useMemo(() => {
+    const counts = { new: 0, read: 0, replied: 0, archived: 0, spam: 0 }
+    inquiries.forEach((i) => { if (counts[i.status] !== undefined) counts[i.status]++ })
+    return Object.entries(counts).map(([key, value]) => ({ name: statusConfig[key].label, value, color: statusConfig[key].color }))
+  }, [inquiries])
+
+  const dailyTrend = useMemo(() => {
+    const days = {}
+    const now = new Date()
+    for (let i = 13; i >= 0; i--) {
+      const d = new Date(now)
+      d.setDate(d.getDate() - i)
+      const key = d.toLocaleDateString('en', { month: 'short', day: 'numeric' })
+      days[key] = 0
+    }
+    inquiries.forEach((inq) => {
+      const d = new Date(inq.created_at)
+      const key = d.toLocaleDateString('en', { month: 'short', day: 'numeric' })
+      if (days[key] !== undefined) days[key]++
+    })
+    return Object.entries(days).map(([date, count]) => ({ date, count }))
+  }, [inquiries])
 
   return (
     <div className="animate-fade-slide-in">
@@ -119,6 +150,47 @@ export default function AdminDashboard() {
                 </div>
               )
             })}
+          </div>
+        </div>
+      )}
+
+      {inquiries.length > 0 && (
+        <div className="mb-8 grid gap-5 sm:grid-cols-2">
+          <div className="rounded-xl border border-[var(--color-border)] bg-white p-5 shadow-sm">
+            <h3 className="mb-4 text-sm font-bold text-[var(--color-text)]">Inquiry Status</h3>
+            <div className="flex h-44 items-center justify-center">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie data={inquiryChartData} cx="50%" cy="50%" innerRadius={48} outerRadius={64} paddingAngle={3} dataKey="value">
+                    {inquiryChartData.map((entry, i) => (
+                      <Cell key={i} fill={entry.color} stroke="transparent" />
+                    ))}
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="space-y-1.5">
+                {inquiryChartData.map((d) => (
+                  <div key={d.name} className="flex items-center gap-2 text-xs">
+                    <span className="size-2.5 rounded-full" style={{ backgroundColor: d.color }} />
+                    <span className="text-[var(--color-muted)]">{d.name}</span>
+                    <span className="font-medium text-[var(--color-text)]">{d.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="rounded-xl border border-[var(--color-border)] bg-white p-5 shadow-sm">
+            <h3 className="mb-4 text-sm font-bold text-[var(--color-text)]">Daily Trend (14 days)</h3>
+            <div className="h-44">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={dailyTrend} margin={{ top: 0, right: 0, left: -16, bottom: 0 }}>
+                  <XAxis dataKey="date" tick={{ fontSize: 9, fill: '#64748b' }} tickLine={false} axisLine={false} interval={0} angle={-20} textAnchor="end" height={20} />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: '#64748b' }} tickLine={false} axisLine={false} width={24} />
+                  <Tooltip contentStyle={{ borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }} />
+                  <Bar dataKey="count" fill="#1e3a5f" radius={[3, 3, 0, 0]} barSize={16} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </div>
       )}
