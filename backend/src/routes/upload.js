@@ -47,7 +47,7 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
 
     const result = await cloudinary.uploader.upload(dataURI, {
       folder: 'dpe-engine-solutions',
-      transformation: [{ width: 1200, height: 1200, crop: 'limit' }],
+      transformation: [{ width: 1200, height: 1200, crop: 'limit', quality: 'auto', fetch_format: 'auto' }],
     })
 
     res.json({ url: result.secure_url })

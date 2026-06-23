@@ -172,8 +172,8 @@ export default function AdminUsers() {
       />
 
       {showForm && !editing && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4 animate-fade-in" onClick={() => { setShowForm(false); setCredentials(null) }}>
-          <div className="w-full max-w-md rounded-xl border border-[var(--color-border)] bg-white p-6 shadow-xl animate-scale-in" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/30 py-8 animate-fade-in" onClick={() => { setShowForm(false); setCredentials(null) }}>
+          <div className="my-auto w-full max-w-md rounded-xl border border-[var(--color-border)] bg-white p-6 shadow-xl animate-scale-in" onClick={(e) => e.stopPropagation()}>
             <h2 className="mb-4 text-base font-bold text-[var(--color-text)]">Add User</h2>
             <form onSubmit={handleSave} className="space-y-3.5">
               <div>
@@ -206,8 +206,8 @@ export default function AdminUsers() {
       )}
 
       {showForm && editing && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4 animate-fade-in" onClick={() => setShowForm(false)}>
-          <div className="w-full max-w-md rounded-xl border border-[var(--color-border)] bg-white p-6 shadow-xl animate-scale-in" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/30 py-8 animate-fade-in" onClick={() => setShowForm(false)}>
+          <div className="my-auto w-full max-w-md rounded-xl border border-[var(--color-border)] bg-white p-6 shadow-xl animate-scale-in" onClick={(e) => e.stopPropagation()}>
             <h2 className="mb-4 text-base font-bold text-[var(--color-text)]">Edit User</h2>
             <form onSubmit={handleSave} className="space-y-3.5">
               <div>
@@ -240,8 +240,8 @@ export default function AdminUsers() {
       )}
 
       {credentials && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4 animate-fade-in" onClick={() => setCredentials(null)}>
-          <div className="w-full max-w-lg rounded-xl border border-[var(--color-border)] bg-white p-6 shadow-xl animate-scale-in" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/30 py-8 animate-fade-in" onClick={() => setCredentials(null)}>
+          <div className="my-auto w-full max-w-lg rounded-xl border border-[var(--color-border)] bg-white p-6 shadow-xl animate-scale-in" onClick={(e) => e.stopPropagation()}>
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-base font-bold text-[var(--color-text)]">User Created — Send Credentials</h2>
               <button onClick={() => setCredentials(null)} className="rounded-lg p-1.5 text-[var(--color-muted)] transition-colors hover:bg-[var(--color-bg)]">

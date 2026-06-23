@@ -140,7 +140,7 @@ export default function AdminProducts() {
       />
 
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4 animate-fade-in" onClick={() => setShowForm(false)}>
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/30 py-8 animate-fade-in" onClick={() => setShowForm(false)}>
           <div className="w-full max-w-lg rounded-xl border border-[var(--color-border)] bg-white p-6 shadow-xl animate-scale-in" onClick={(e) => e.stopPropagation()}>
             <h2 className="mb-4 text-base font-bold text-[var(--color-text)]">{editing ? 'Edit Product' : 'Add Product'}</h2>
             <form onSubmit={handleSave} className="space-y-3.5">
