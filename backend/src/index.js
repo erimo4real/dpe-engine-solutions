@@ -10,6 +10,9 @@ import productRoutes from './routes/products.js'
 import categoryRoutes from './routes/categories.js'
 import inquiryRoutes from './routes/inquiries.js'
 import uploadRoutes from './routes/upload.js'
+import settingsRoutes from './routes/settings.js'
+import chatRoutes from './routes/chat.js'
+import whatsappRoutes from './routes/whatsapp.js'
 
 const app = express()
 const server = createServer(app)
@@ -54,6 +57,7 @@ app.use(cors({
   credentials: true,
 }))
 app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 app.use('/api/auth/login', authLimiter)
 app.use('/api/auth/forgot-password', passwordResetLimiter)
@@ -66,6 +70,9 @@ app.use('/api/products', productRoutes)
 app.use('/api/categories', categoryRoutes)
 app.use('/api/inquiries', inquiryRoutes)
 app.use('/api/upload', uploadRoutes)
+app.use('/api/settings', settingsRoutes)
+app.use('/api/chat', chatRoutes)
+app.use('/api/whatsapp', whatsappRoutes)
 
 app.get('/api/health', (_, res) => {
   res.json({ status: 'ok' })

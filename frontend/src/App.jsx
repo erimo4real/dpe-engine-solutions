@@ -3,6 +3,7 @@ import { Routes, Route, Outlet, useLocation, Link } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import WhatsAppFab from './components/WhatsAppFab'
+import ChatWidget from './components/ChatWidget'
 import ProtectedRoute from './components/ProtectedRoute'
 import AdminLayout from './components/AdminLayout'
 import Home from './pages/Home'
@@ -17,6 +18,7 @@ import AdminCategories from './pages/AdminCategories'
 import AdminInquiries from './pages/AdminInquiries'
 import AdminUsers from './pages/AdminUsers'
 import AdminProfile from './pages/AdminProfile'
+import AdminSettings from './pages/AdminSettings'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -45,6 +47,7 @@ function PublicLayout() {
         <Outlet />
       </main>
       <Footer />
+      <ChatWidget />
       <WhatsAppFab />
     </div>
   )
@@ -63,6 +66,7 @@ export default function App() {
           <Route path="categories" element={<AdminCategories />} />
           <Route path="inquiries" element={<AdminInquiries />} />
           <Route path="users" element={<AdminUsers />} />
+          <Route path="settings" element={<AdminSettings />} />
           <Route path="profile" element={<AdminProfile />} />
         </Route>
         <Route path="*" element={<NotFound />} />

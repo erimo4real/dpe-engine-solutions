@@ -62,6 +62,13 @@ export const api = {
     delete: (id) => request(`/api/auth/users/${id}`, { method: 'DELETE' }),
     updateProfile: (body) => request('/api/auth/profile', { method: 'PUT', body }),
   },
+  chat: {
+    send: (message) => request('/api/chat', { method: 'POST', body: { message } }),
+  },
+  settings: {
+    get: () => request('/api/settings'),
+    update: (body) => request('/api/settings', { method: 'PUT', body }),
+  },
   upload: (file) => {
     const formData = new FormData()
     formData.append('image', file)
